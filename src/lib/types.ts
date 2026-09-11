@@ -100,6 +100,15 @@ export interface ScadenzaPersonale {
   creato_il: string;
 }
 
+export type TipoPresenza = "entrata" | "uscita";
+
+export interface Presenza {
+  id: string;
+  personale_id: string;
+  tipo: TipoPresenza;
+  timbrato_il: string;
+}
+
 export interface DocumentoMezzo {
   id: string;
   mezzo_id: string;

@@ -47,6 +47,7 @@ export default async function PersonalePage() {
         </div>
 
         <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="border-b border-zinc-200 bg-zinc-50 text-left text-xs uppercase text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
               <tr>
@@ -87,6 +88,7 @@ export default async function PersonalePage() {
               )}
             </tbody>
           </table>
+          </div>
         </div>
       </main>
     </div>

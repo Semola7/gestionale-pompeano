@@ -40,9 +40,19 @@ type ScadenzaPersonaleRiga = {
   persona: { id: string; nome_completo: string } | null;
 };
 
+type PresenzaRiga = {
+  personale_id: string;
+  tipo: "entrata" | "uscita";
+  timbrato_il: string;
+  persona: { nome_completo: string } | null;
+};
+
 export default async function DashboardPage() {
   const profile = await getCurrentProfile();
   const supabase = await createClient();
+
+  const inizioGiorno = new Date();
+  inizioGiorno.setHours(0, 0, 0, 0);
 
   const [
     { data: mezzi },
@@ -51,6 +61,7 @@ export default async function DashboardPage() {
     { data: scadenzeMezzi },
     { data: scadenzeAttrezzature },
     { data: scadenzePersonale },
+    { data: presenzeOggi },
   ] = await Promise.all([
     supabase.from("mezzi").select("tipo").returns<Pick<Mezzo, "tipo">[]>(),
     supabase.from("attrezzature").select("id", { count: "exact", head: true }),
@@ -70,7 +81,21 @@ export default async function DashboardPage() {
       .select("id, tipo, data_scadenza, completata_il, persona:personale(id, nome_completo)")
       .is("completata_il", null)
       .returns<ScadenzaPersonaleRiga[]>(),
+    supabase
+      .from("presenze")
+      .select("personale_id, tipo, timbrato_il, persona:personale(nome_completo)")
+      .gte("timbrato_il", inizioGiorno.toISOString())
+      .order("timbrato_il", { ascending: true })
+      .returns<PresenzaRiga[]>(),
   ]);
+
+  const ultimoEventoPerPersona = new Map<string, PresenzaRiga>();
+  for (const p of presenzeOggi ?? []) {
+    ultimoEventoPerPersona.set(p.personale_id, p);
+  }
+  const presentiOggi = Array.from(ultimoEventoPerPersona.values())
+    .filter((p) => p.tipo === "entrata")
+    .sort((a, b) => a.timbrato_il.localeCompare(b.timbrato_il));
 
   const conteggioPerTipo = new Map<string, number>();
   for (const m of mezzi ?? []) {
@@ -139,8 +164,32 @@ export default async function DashboardPage() {
           </div>
 
           <div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
-            <p className="text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">Personale</p>
-            <p className="mt-1 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">{totalePersonale ?? 0}</p>
+            <p className="text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">Personale presente oggi</p>
+            <p className="mt-1 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+              {presentiOggi.length} <span className="text-base font-normal text-zinc-400 dark:text-zinc-600">/ {totalePersonale ?? 0}</span>
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
+          <h2 className="mb-4 text-sm font-semibold uppercase text-zinc-500 dark:text-zinc-400">Presenti oggi</h2>
+          <div className="space-y-2">
+            {presentiOggi.map((p) => (
+              <div
+                key={p.personale_id}
+                className="flex items-center justify-between gap-4 rounded-md border border-zinc-100 px-3 py-2 dark:border-zinc-900"
+              >
+                <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+                  {p.persona?.nome_completo ?? "—"}
+                </span>
+                <span className="text-sm text-zinc-500 dark:text-zinc-400">
+                  dalle {new Date(p.timbrato_il).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
+                </span>
+              </div>
+            ))}
+            {presentiOggi.length === 0 && (
+              <p className="text-sm text-zinc-400 dark:text-zinc-600">Nessuna timbratura di entrata oggi.</p>
+            )}
           </div>
         </div>
 

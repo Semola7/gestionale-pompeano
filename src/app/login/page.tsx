@@ -46,7 +46,7 @@ export default function LoginPage() {
           width={480}
           height={200}
           priority
-          className="mx-auto mb-6 h-16 w-auto"
+          className="mx-auto mb-6 h-28 w-auto"
         />
         <h1 className="mb-1 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
           Gestionale Sollevamenti
