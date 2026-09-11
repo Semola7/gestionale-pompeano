@@ -2,9 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { formattaData } from "@/lib/date-utils";
 import { SCADENZE_PERSONALE_TIPI, TIPO_SCADENZA_LABELS } from "@/lib/labels";
 import type { Personale, ScadenzaPersonale } from "@/lib/types";
 import { aggiungiScadenzaPersonale, eliminaPersonale } from "../actions";
+import { PersonaleEditForm } from "./personale-edit-form";
 import { ScadenzaRow } from "./scadenza-row";
 
 export default async function PersonaleDetailPage(ctx: PageProps<"/personale/[id]">) {
@@ -31,23 +33,39 @@ export default async function PersonaleDetailPage(ctx: PageProps<"/personale/[id
         </Link>
       </div>
 
-        <div className="flex items-start justify-between rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
-          <div>
+        {isAdmin ? (
+          <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
+            <div className="mb-4 flex items-center justify-between">
+              <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">{persona.nome_completo}</h1>
+              <form action={eliminaPersonale.bind(null, persona.id)}>
+                <button type="submit" className="text-sm text-red-600 hover:underline dark:text-red-400">
+                  Elimina nominativo
+                </button>
+              </form>
+            </div>
+            <PersonaleEditForm persona={persona} />
+          </div>
+        ) : (
+          <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
             <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">{persona.nome_completo}</h1>
             {persona.mansione && <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{persona.mansione}</p>}
             <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
               {[persona.telefono, persona.email].filter(Boolean).join(" · ") || "Nessun contatto registrato"}
             </p>
+            {(persona.data_nascita || persona.codice_fiscale || persona.indirizzo_residenza) && (
+              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                {[
+                  persona.data_nascita && `Nato il ${formattaData(persona.data_nascita)}`,
+                  persona.codice_fiscale,
+                  persona.indirizzo_residenza,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            )}
             {persona.note && <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">{persona.note}</p>}
           </div>
-          {isAdmin && (
-            <form action={eliminaPersonale.bind(null, persona.id)}>
-              <button type="submit" className="text-sm text-red-600 hover:underline dark:text-red-400">
-                Elimina nominativo
-              </button>
-            </form>
-          )}
-        </div>
+        )}
 
         <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
           <h2 className="mb-4 text-sm font-semibold uppercase text-zinc-500 dark:text-zinc-400">Scadenze</h2>

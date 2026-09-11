@@ -6,29 +6,46 @@ import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth";
 import type { TipoScadenza } from "@/lib/types";
 
+function campiPersonaleDaForm(formData: FormData) {
+  return {
+    nome_completo: String(formData.get("nome_completo") ?? "").trim(),
+    mansione: String(formData.get("mansione") ?? "").trim() || null,
+    data_nascita: String(formData.get("data_nascita") ?? "") || null,
+    codice_fiscale: String(formData.get("codice_fiscale") ?? "").trim().toUpperCase() || null,
+    indirizzo_residenza: String(formData.get("indirizzo_residenza") ?? "").trim() || null,
+    telefono: String(formData.get("telefono") ?? "").trim() || null,
+    email: String(formData.get("email") ?? "").trim() || null,
+    note: String(formData.get("note") ?? "").trim() || null,
+  };
+}
+
 export async function creaPersonale(formData: FormData) {
   await requireRole("admin");
   const supabase = await createClient();
 
-  const nomeCompleto = String(formData.get("nome_completo") ?? "").trim();
-  if (!nomeCompleto) throw new Error("Il nominativo è obbligatorio.");
+  const campi = campiPersonaleDaForm(formData);
+  if (!campi.nome_completo) throw new Error("Il nominativo è obbligatorio.");
 
-  const { data, error } = await supabase
-    .from("personale")
-    .insert({
-      nome_completo: nomeCompleto,
-      mansione: String(formData.get("mansione") ?? "").trim() || null,
-      telefono: String(formData.get("telefono") ?? "").trim() || null,
-      email: String(formData.get("email") ?? "").trim() || null,
-      note: String(formData.get("note") ?? "").trim() || null,
-    })
-    .select("id")
-    .single();
+  const { data, error } = await supabase.from("personale").insert(campi).select("id").single();
 
   if (error || !data) throw new Error(`Errore nel salvataggio del nominativo: ${error?.message}`);
 
   revalidatePath("/personale");
   redirect(`/personale/${data.id}`);
+}
+
+export async function aggiornaPersonale(id: string, formData: FormData) {
+  await requireRole("admin");
+  const supabase = await createClient();
+
+  const campi = campiPersonaleDaForm(formData);
+  if (!campi.nome_completo) throw new Error("Il nominativo è obbligatorio.");
+
+  const { error } = await supabase.from("personale").update(campi).eq("id", id);
+  if (error) throw new Error(`Errore nell'aggiornamento del nominativo: ${error.message}`);
+
+  revalidatePath("/personale");
+  revalidatePath(`/personale/${id}`);
 }
 
 export async function eliminaPersonale(id: string) {

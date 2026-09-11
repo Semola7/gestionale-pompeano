@@ -75,6 +75,9 @@ export interface Personale {
   id: string;
   nome_completo: string;
   mansione: string | null;
+  data_nascita: string | null;
+  codice_fiscale: string | null;
+  indirizzo_residenza: string | null;
   telefono: string | null;
   email: string | null;
   note: string | null;
