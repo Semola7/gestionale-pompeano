@@ -71,6 +71,8 @@ export interface Attrezzatura {
   creato_il: string;
 }
 
+export type TipoContratto = "determinato" | "indeterminato";
+
 export interface Personale {
   id: string;
   nome_completo: string;
@@ -78,6 +80,9 @@ export interface Personale {
   data_nascita: string | null;
   codice_fiscale: string | null;
   indirizzo_residenza: string | null;
+  tipo_contratto: TipoContratto;
+  data_assunzione: string | null;
+  scadenza_contratto: string | null;
   telefono: string | null;
   email: string | null;
   note: string | null;

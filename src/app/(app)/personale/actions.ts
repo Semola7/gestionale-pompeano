@@ -4,15 +4,19 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth";
-import type { TipoScadenza } from "@/lib/types";
+import type { TipoContratto, TipoScadenza } from "@/lib/types";
 
 function campiPersonaleDaForm(formData: FormData) {
+  const tipoContratto = String(formData.get("tipo_contratto") ?? "indeterminato") as TipoContratto;
   return {
     nome_completo: String(formData.get("nome_completo") ?? "").trim(),
     mansione: String(formData.get("mansione") ?? "").trim() || null,
     data_nascita: String(formData.get("data_nascita") ?? "") || null,
     codice_fiscale: String(formData.get("codice_fiscale") ?? "").trim().toUpperCase() || null,
     indirizzo_residenza: String(formData.get("indirizzo_residenza") ?? "").trim() || null,
+    tipo_contratto: tipoContratto,
+    data_assunzione: String(formData.get("data_assunzione") ?? "") || null,
+    scadenza_contratto: tipoContratto === "determinato" ? String(formData.get("scadenza_contratto") ?? "") || null : null,
     telefono: String(formData.get("telefono") ?? "").trim() || null,
     email: String(formData.get("email") ?? "").trim() || null,
     note: String(formData.get("note") ?? "").trim() || null,

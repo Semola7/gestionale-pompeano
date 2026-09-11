@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { formattaData } from "@/lib/date-utils";
-import { SCADENZE_PERSONALE_TIPI, TIPO_SCADENZA_LABELS } from "@/lib/labels";
+import { SCADENZE_PERSONALE_TIPI, TIPO_CONTRATTO_LABELS, TIPO_SCADENZA_LABELS } from "@/lib/labels";
 import type { Personale, ScadenzaPersonale } from "@/lib/types";
 import { aggiungiScadenzaPersonale, eliminaPersonale } from "../actions";
 import { PersonaleEditForm } from "./personale-edit-form";
@@ -63,6 +63,15 @@ export default async function PersonaleDetailPage(ctx: PageProps<"/personale/[id
                   .join(" · ")}
               </p>
             )}
+            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+              {[
+                TIPO_CONTRATTO_LABELS[persona.tipo_contratto],
+                persona.data_assunzione && `assunto il ${formattaData(persona.data_assunzione)}`,
+                persona.scadenza_contratto && `scadenza ${formattaData(persona.scadenza_contratto)}`,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
             {persona.note && <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">{persona.note}</p>}
           </div>
         )}

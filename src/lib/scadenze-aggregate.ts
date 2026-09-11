@@ -27,20 +27,34 @@ type ScadenzaPersonaleRiga = {
   persona: { id: string; nome_completo: string } | null;
 };
 
+type PersonaleContrattoRiga = {
+  id: string;
+  nome_completo: string;
+  tipo_contratto: string;
+  scadenza_contratto: string | null;
+};
+
 export async function fetchScadenzeAggregate(
   supabase: Awaited<ReturnType<typeof createClient>>
 ): Promise<RigaScadenza[]> {
-  const [{ data: mezzi }, { data: scadenzeAttrezzature }, { data: scadenzePersonale }] = await Promise.all([
-    supabase.from("mezzi").select("*").returns<Mezzo[]>(),
-    supabase
-      .from("scadenze_attrezzature")
-      .select("id, tipo, data_scadenza, attrezzatura:attrezzature(id, nome)")
-      .returns<ScadenzaAttrezzaturaRiga[]>(),
-    supabase
-      .from("scadenze_personale")
-      .select("id, tipo, data_scadenza, persona:personale(id, nome_completo)")
-      .returns<ScadenzaPersonaleRiga[]>(),
-  ]);
+  const [{ data: mezzi }, { data: scadenzeAttrezzature }, { data: scadenzePersonale }, { data: personale }] =
+    await Promise.all([
+      supabase.from("mezzi").select("*").returns<Mezzo[]>(),
+      supabase
+        .from("scadenze_attrezzature")
+        .select("id, tipo, data_scadenza, attrezzatura:attrezzature(id, nome)")
+        .returns<ScadenzaAttrezzaturaRiga[]>(),
+      supabase
+        .from("scadenze_personale")
+        .select("id, tipo, data_scadenza, persona:personale(id, nome_completo)")
+        .returns<ScadenzaPersonaleRiga[]>(),
+      supabase
+        .from("personale")
+        .select("id, nome_completo, tipo_contratto, scadenza_contratto")
+        .eq("tipo_contratto", "determinato")
+        .not("scadenza_contratto", "is", null)
+        .returns<PersonaleContrattoRiga[]>(),
+    ]);
 
   const righeMezzi: RigaScadenza[] = (mezzi ?? []).flatMap((m) =>
     MEZZO_SCADENZA_FIELDS.filter((f) => m[f.key]).map((f) => ({
@@ -74,5 +88,15 @@ export async function fetchScadenzeAggregate(
     stato: statoScadenza(s.data_scadenza),
   }));
 
-  return [...righeMezzi, ...righeAttrezzature, ...righePersonale];
+  const righeContrattiPersonale: RigaScadenza[] = (personale ?? []).map((p) => ({
+    id: `${p.id}-scadenza_contratto`,
+    entita: "Personale" as const,
+    entitaNome: p.nome_completo,
+    entitaHref: `/personale/${p.id}`,
+    tipoLabel: "Scadenza contratto",
+    data_scadenza: p.scadenza_contratto as string,
+    stato: statoScadenza(p.scadenza_contratto as string),
+  }));
+
+  return [...righeMezzi, ...righeAttrezzature, ...righePersonale, ...righeContrattiPersonale];
 }

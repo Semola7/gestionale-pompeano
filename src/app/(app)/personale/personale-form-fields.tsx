@@ -1,7 +1,14 @@
+"use client";
+
+import { useState } from "react";
 import { Field, inputClass } from "@/components/field";
-import type { Personale } from "@/lib/types";
+import { TIPO_CONTRATTO_LABELS } from "@/lib/labels";
+import type { Personale, TipoContratto } from "@/lib/types";
 
 export function PersonaleFormFields({ persona }: { persona?: Personale }) {
+  const [tipoContratto, setTipoContratto] = useState<TipoContratto>(persona?.tipo_contratto ?? "indeterminato");
+  const isDeterminato = tipoContratto === "determinato";
+
   return (
     <div className="space-y-4">
       <Field label="Nome e cognome" required>
@@ -34,6 +41,34 @@ export function PersonaleFormFields({ persona }: { persona?: Personale }) {
       <Field label="Indirizzo di residenza">
         <input name="indirizzo_residenza" defaultValue={persona?.indirizzo_residenza ?? ""} className={inputClass} />
       </Field>
+
+      <h3 className="pt-2 text-xs font-semibold uppercase text-amber-600 dark:text-amber-400">Contratto</h3>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Field label="Tipo di contratto">
+          <select
+            name="tipo_contratto"
+            value={tipoContratto}
+            onChange={(e) => setTipoContratto(e.target.value as TipoContratto)}
+            className={inputClass}
+          >
+            {Object.entries(TIPO_CONTRATTO_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Data assunzione">
+          <input type="date" name="data_assunzione" defaultValue={persona?.data_assunzione ?? ""} className={inputClass} />
+        </Field>
+      </div>
+
+      {isDeterminato && (
+        <Field label="Scadenza contratto">
+          <input type="date" name="scadenza_contratto" defaultValue={persona?.scadenza_contratto ?? ""} className={inputClass} />
+        </Field>
+      )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label="Telefono">

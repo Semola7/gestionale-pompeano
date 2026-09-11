@@ -1,4 +1,4 @@
-import type { Mezzo, RegimePossesso, TipoAttrezzatura, TipoMezzo, TipoScadenza } from "@/lib/types";
+import type { Mezzo, RegimePossesso, TipoAttrezzatura, TipoContratto, TipoMezzo, TipoScadenza } from "@/lib/types";
 
 export const TIPO_MEZZO_LABELS: Record<TipoMezzo, string> = {
   autocarro: "Autocarro",
@@ -28,6 +28,11 @@ export const MEZZO_SCADENZA_FIELDS: { key: keyof Mezzo; label: string }[] = [
   { key: "scadenza_manutenzione_programmata", label: "Manutenzione programmata" },
   { key: "scadenza_contratto_noleggio", label: "Contratto noleggio/leasing" },
 ];
+
+export const TIPO_CONTRATTO_LABELS: Record<TipoContratto, string> = {
+  determinato: "Tempo determinato",
+  indeterminato: "Tempo indeterminato",
+};
 
 export const TIPO_ATTREZZATURA_LABELS: Record<TipoAttrezzatura, string> = {
   catena: "Catena",
