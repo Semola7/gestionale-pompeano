@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
@@ -39,6 +40,14 @@ export default function LoginPage() {
         onSubmit={handleSubmit}
         className="w-full max-w-sm rounded-xl border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-800 dark:bg-zinc-950"
       >
+        <Image
+          src="/lg_pmp.png"
+          alt="Pompeano Antonio & Figli"
+          width={480}
+          height={200}
+          priority
+          className="mx-auto mb-6 h-16 w-auto"
+        />
         <h1 className="mb-1 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
           Gestionale Sollevamenti
         </h1>

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { getCurrentProfile } from "@/lib/auth";
 import { LogoutButton } from "./logout-button";
@@ -8,8 +9,8 @@ export async function AppHeader() {
   return (
     <header className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-200 bg-white px-6 py-3 dark:border-zinc-800 dark:bg-zinc-950">
       <div className="flex items-center gap-6">
-        <Link href="/dashboard" className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-          Gestionale Sollevamenti
+        <Link href="/dashboard" className="flex items-center gap-2">
+          <Image src="/lg_pmp.png" alt="Pompeano Antonio & Figli" width={480} height={200} className="h-8 w-auto" priority />
         </Link>
         <nav className="flex items-center gap-4 text-sm font-medium text-zinc-600 dark:text-zinc-300">
           <Link href="/dashboard" className="hover:text-zinc-900 dark:hover:text-zinc-50">

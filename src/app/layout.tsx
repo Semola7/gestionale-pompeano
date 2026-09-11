@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Gestionale Sollevamenti",
+  title: "Gestionale Sollevamenti — Pompeano Antonio & Figli",
   description: "Gestione personale, mezzi e attrezzature",
 };
 
