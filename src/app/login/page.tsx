@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -30,8 +28,10 @@ export default function LoginPage() {
       return;
     }
 
-    router.replace("/dashboard");
-    router.refresh();
+    // Hard navigation: ensures the session cookie set by signInWithPassword
+    // is fully committed before the server sees the request, avoiding a
+    // race with client-side router prefetching.
+    window.location.href = "/dashboard";
   }
 
   return (

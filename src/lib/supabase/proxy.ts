@@ -37,13 +37,18 @@ export async function updateSession(request: NextRequest) {
 
   if (!user && !isPublicRoute) {
     const loginUrl = new URL('/login', request.url)
-    return NextResponse.redirect(loginUrl)
+    const redirectResponse = NextResponse.redirect(loginUrl)
+    redirectResponse.headers.set('Cache-Control', 'no-store, must-revalidate')
+    return redirectResponse
   }
 
   if (user && request.nextUrl.pathname === '/login') {
     const dashboardUrl = new URL('/dashboard', request.url)
-    return NextResponse.redirect(dashboardUrl)
+    const redirectResponse = NextResponse.redirect(dashboardUrl)
+    redirectResponse.headers.set('Cache-Control', 'no-store, must-revalidate')
+    return redirectResponse
   }
 
+  response.headers.set('Cache-Control', 'no-store, must-revalidate')
   return response
 }
