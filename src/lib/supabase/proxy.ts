@@ -29,6 +29,7 @@ export async function updateSession(request: NextRequest) {
 
   const {
     data: { user },
+    error: userError,
   } = await supabase.auth.getUser()
 
   const isPublicRoute = PUBLIC_ROUTES.some((route) =>
@@ -39,6 +40,15 @@ export async function updateSession(request: NextRequest) {
     const loginUrl = new URL('/login', request.url)
     const redirectResponse = NextResponse.redirect(loginUrl)
     redirectResponse.headers.set('Cache-Control', 'no-store, must-revalidate')
+    // Temporary debug header — remove once the auth loop is diagnosed.
+    redirectResponse.headers.set(
+      'X-Debug-Auth-Error',
+      userError ? `${userError.name}: ${userError.message}` : 'no-user-no-error'
+    )
+    redirectResponse.headers.set(
+      'X-Debug-Cookie-Count',
+      String(request.cookies.getAll().length)
+    )
     return redirectResponse
   }
 
