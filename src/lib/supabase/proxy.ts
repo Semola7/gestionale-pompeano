@@ -32,6 +32,17 @@ export async function updateSession(request: NextRequest) {
     error: userError,
   } = await supabase.auth.getUser()
 
+  console.log(
+    '[proxy]',
+    request.nextUrl.pathname,
+    'user:',
+    user?.id ?? null,
+    'error:',
+    userError?.message ?? null,
+    'cookies:',
+    request.cookies.getAll().map((c) => c.name)
+  )
+
   const isPublicRoute = PUBLIC_ROUTES.some((route) =>
     request.nextUrl.pathname.startsWith(route)
   )
