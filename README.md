@@ -1,16 +1,33 @@
-# Gestionale Sollevamenti
+# Gestionale Sollevamenti — Pompeano Antonio & Figli
 
 Gestionale per un'azienda di sollevamenti: anagrafica personale, mezzi e
-attrezzature, con le relative scadenze (revisioni, verifiche periodiche,
-certificazioni, formazione, ecc.).
+attrezzature, con le relative scadenze (revisioni, verifiche periodiche
+INAIL, collaudi, assicurazioni, manutenzioni programmate, patenti/patentini,
+visite mediche, corsi sicurezza, DPI...) e archivio documenti per mezzo.
 
 Stack: Next.js (App Router, TypeScript, Tailwind) + Supabase (Postgres, Auth,
 RLS) + Vercel + GitHub.
 
-Progetto scaffold iniziale: al momento contiene solo login/autenticazione e
-gestione ruoli (`admin` / `operatore`). Le tabelle di dominio (personale,
-mezzi, attrezzature, scadenze) verranno aggiunte in migration successive una
-volta definiti i requisiti con il cliente.
+## Cosa c'è già
+
+- Login/autenticazione e ruoli (`admin` / `operatore`)
+- Anagrafica **Mezzi** (autocarro, auto, gru, autogru, piattaforma aerea,
+  camion, camion gruato, rimorchio) con scadenze e documenti allegati
+- Anagrafica **Attrezzature** (catene, funi, ganci...) con scadenze
+- Anagrafica **Personale** (contatti, patenti/patentini, visite mediche,
+  corsi, DPI) con scadenze
+- Vista **Scadenze** unificata con filtri (scadute/in arrivo, tutte, completate)
+- **Dashboard** con conteggio mezzi per tipologia e scadenze prossime
+
+## Cosa manca ancora
+
+- **Notifiche email 20 giorni prima della scadenza**: richiede un servizio di
+  invio email (es. [Resend](https://resend.com), piano gratuito sufficiente
+  per iniziare) e un trigger schedulato (Supabase Cron + Edge Function, o
+  Vercel Cron) che ogni giorno controlli le scadenze e mandi l'avviso. Da
+  implementare appena si sceglie il servizio email.
+- **Utenti aggiuntivi oltre all'admin**: per ora previsto solo l'account
+  admin del titolare; altri utenti (es. capisquadra) si aggiungono in seguito.
 
 ## Setup locale
 
@@ -30,7 +47,7 @@ volta definiti i requisiti con il cliente.
 
    Valorizza `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` con i valori che trovi in Supabase → Project Settings → API.
 
-4. **Applica lo schema del database.** Nel progetto Supabase, apri l'SQL Editor ed esegui in ordine i file in `supabase/migrations/` (0001, 0002, 0003). In alternativa, se hai installato la [Supabase CLI](https://supabase.com/docs/guides/cli) e collegato il progetto, puoi eseguire `supabase db push`.
+4. **Applica lo schema del database.** Nel progetto Supabase, apri l'SQL Editor ed esegui in ordine tutti i file in `supabase/migrations/` (0001...0006). In alternativa, se hai installato la [Supabase CLI](https://supabase.com/docs/guides/cli) e collegato il progetto, puoi eseguire `supabase db push`.
 
 5. **Crea il primo utente admin.** In Supabase → Authentication → Users, crea un utente con email/password. Poi, nell'SQL Editor, promuovilo ad admin:
 
