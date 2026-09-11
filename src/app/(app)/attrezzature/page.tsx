@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { AppHeader } from "@/components/app-header";
 import { ScadenzaBadge } from "@/components/scadenza-badge";
 import { getCurrentProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -31,20 +30,18 @@ export default async function AttrezzaturePage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col">
-      <AppHeader />
-      <main className="flex-1 bg-zinc-50 px-6 py-8 dark:bg-black">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">Attrezzature</h1>
-          {profile.ruolo === "admin" && (
-            <Link
-              href="/attrezzature/nuovo"
-              className="rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
-            >
-              + Nuova attrezzatura
-            </Link>
-          )}
-        </div>
+    <div>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">Attrezzature</h1>
+        {profile.ruolo === "admin" && (
+          <Link
+            href="/attrezzature/nuovo"
+            className="rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
+          >
+            + Nuova attrezzatura
+          </Link>
+        )}
+      </div>
 
         <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
           <div className="overflow-x-auto">
@@ -89,8 +86,7 @@ export default async function AttrezzaturePage() {
             </tbody>
           </table>
           </div>
-        </div>
-      </main>
+      </div>
     </div>
   );
 }

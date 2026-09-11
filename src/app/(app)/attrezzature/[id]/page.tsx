@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AppHeader } from "@/components/app-header";
 import { getCurrentProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { SCADENZE_ATTREZZATURE_TIPI, TIPO_ATTREZZATURA_LABELS, TIPO_SCADENZA_LABELS } from "@/lib/labels";
@@ -25,14 +24,12 @@ export default async function AttrezzaturaDetailPage(ctx: PageProps<"/attrezzatu
     .returns<ScadenzaAttrezzatura[]>();
 
   return (
-    <div className="flex flex-1 flex-col">
-      <AppHeader />
-      <main className="flex-1 space-y-6 bg-zinc-50 px-6 py-8 dark:bg-black">
-        <div>
-          <Link href="/attrezzature" className="text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50">
-            ← Attrezzature
-          </Link>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <Link href="/attrezzature" className="text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50">
+          ← Attrezzature
+        </Link>
+      </div>
 
         <div className="flex items-start justify-between rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
           <div>
@@ -115,7 +112,6 @@ export default async function AttrezzaturaDetailPage(ctx: PageProps<"/attrezzatu
             </form>
           )}
         </div>
-      </main>
     </div>
   );
 }

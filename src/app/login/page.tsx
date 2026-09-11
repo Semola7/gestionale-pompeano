@@ -49,7 +49,7 @@ export default function LoginPage() {
           className="mx-auto mb-6 h-28 w-auto"
         />
         <h1 className="mb-1 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-          Gestionale Sollevamenti
+          Gestionale
         </h1>
         <p className="mb-6 text-sm text-zinc-500 dark:text-zinc-400">
           Accedi con le credenziali fornite dal tuo amministratore.

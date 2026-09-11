@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { AppHeader } from "@/components/app-header";
 import { ScadenzaBadge } from "@/components/scadenza-badge";
 import { createClient } from "@/lib/supabase/server";
 import { formattaData } from "@/lib/date-utils";
@@ -22,27 +21,25 @@ export default async function ScadenzePage(ctx: PageProps<"/scadenze">) {
     .sort((a, b) => a.data_scadenza.localeCompare(b.data_scadenza));
 
   return (
-    <div className="flex flex-1 flex-col">
-      <AppHeader />
-      <main className="flex-1 bg-zinc-50 px-6 py-8 dark:bg-black">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">Scadenze</h1>
-          <div className="flex gap-2">
-            {FILTRI.map((f) => (
-              <Link
-                key={f.valore}
-                href={`/scadenze?stato=${f.valore}`}
-                className={`rounded-md px-3 py-1.5 text-sm font-medium ${
-                  filtro === f.valore
-                    ? "bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900"
-                    : "border border-zinc-300 text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
-                }`}
-              >
-                {f.label}
-              </Link>
-            ))}
-          </div>
+    <div>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">Scadenze</h1>
+        <div className="flex gap-2">
+          {FILTRI.map((f) => (
+            <Link
+              key={f.valore}
+              href={`/scadenze?stato=${f.valore}`}
+              className={`rounded-md px-3 py-1.5 text-sm font-medium ${
+                filtro === f.valore
+                  ? "bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900"
+                  : "border border-zinc-300 text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+              }`}
+            >
+              {f.label}
+            </Link>
+          ))}
         </div>
+      </div>
 
         <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
           <div className="overflow-x-auto">
@@ -82,8 +79,7 @@ export default async function ScadenzePage(ctx: PageProps<"/scadenze">) {
             </tbody>
           </table>
           </div>
-        </div>
-      </main>
+      </div>
     </div>
   );
 }

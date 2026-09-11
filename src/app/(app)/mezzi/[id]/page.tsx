@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AppHeader } from "@/components/app-header";
 import { ScadenzaBadge } from "@/components/scadenza-badge";
 import { getCurrentProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -30,14 +29,12 @@ export default async function MezzoDetailPage(ctx: PageProps<"/mezzi/[id]">) {
   const scadenzeValorizzate = MEZZO_SCADENZA_FIELDS.filter((f) => mezzo[f.key]);
 
   return (
-    <div className="flex flex-1 flex-col">
-      <AppHeader />
-      <main className="flex-1 space-y-6 bg-zinc-50 px-6 py-8 dark:bg-black">
-        <div>
-          <Link href="/mezzi" className="text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50">
-            ← Mezzi
-          </Link>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <Link href="/mezzi" className="text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50">
+          ← Mezzi
+        </Link>
+      </div>
 
         {isAdmin ? (
           <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
@@ -110,7 +107,6 @@ export default async function MezzoDetailPage(ctx: PageProps<"/mezzi/[id]">) {
 
           {isAdmin && <FileDropzone mezzoId={mezzo.id} />}
         </div>
-      </main>
     </div>
   );
 }
