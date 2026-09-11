@@ -34,14 +34,28 @@ export type TipoScadenza =
   | "dpi"
   | "altro";
 
+export type RegimePossesso = "proprieta" | "noleggio" | "leasing";
+
 export interface Mezzo {
   id: string;
   tipo: TipoMezzo;
   nome: string;
   targa: string | null;
+  telaio: string | null;
   marca: string | null;
   modello: string | null;
   anno_immatricolazione: number | null;
+  regime_possesso: RegimePossesso;
+  societa_noleggio: string | null;
+  assegnato_a: string | null;
+  compagnia_assicurativa: string | null;
+  scadenza_assicurazione: string | null;
+  scadenza_revisione_mctc: string | null;
+  scadenza_bollo: string | null;
+  scadenza_visita_inail: string | null;
+  scadenza_collaudo: string | null;
+  scadenza_manutenzione_programmata: string | null;
+  scadenza_contratto_noleggio: string | null;
   note: string | null;
   attivo: boolean;
   creato_il: string;
@@ -60,21 +74,11 @@ export interface Attrezzatura {
 export interface Personale {
   id: string;
   nome_completo: string;
+  mansione: string | null;
   telefono: string | null;
   email: string | null;
   note: string | null;
   attivo: boolean;
-  creato_il: string;
-}
-
-export interface ScadenzaMezzo {
-  id: string;
-  mezzo_id: string;
-  tipo: TipoScadenza;
-  descrizione: string | null;
-  data_scadenza: string;
-  completata_il: string | null;
-  note: string | null;
   creato_il: string;
 }
 
@@ -84,7 +88,6 @@ export interface ScadenzaAttrezzatura {
   tipo: TipoScadenza;
   descrizione: string | null;
   data_scadenza: string;
-  completata_il: string | null;
   note: string | null;
   creato_il: string;
 }
@@ -95,7 +98,6 @@ export interface ScadenzaPersonale {
   tipo: TipoScadenza;
   descrizione: string | null;
   data_scadenza: string;
-  completata_il: string | null;
   note: string | null;
   creato_il: string;
 }

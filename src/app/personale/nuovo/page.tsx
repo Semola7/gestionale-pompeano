@@ -24,6 +24,15 @@ export default async function NuovoPersonalePage() {
             />
           </div>
 
+          <div>
+            <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Mansione</label>
+            <input
+              name="mansione"
+              placeholder="es. Capo squadra, Gruista, Autista, Operaio..."
+              className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            />
+          </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Telefono</label>

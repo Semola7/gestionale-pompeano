@@ -1,11 +1,9 @@
 // Soglia di "urgenza" allineata al preavviso via email richiesto (20 giorni).
 const GIORNI_PREAVVISO = 20;
 
-export type StatoScadenza = "scaduta" | "urgente" | "ok" | "completata";
+export type StatoScadenza = "scaduta" | "urgente" | "ok";
 
-export function statoScadenza(dataScadenza: string, completataIl: string | null): StatoScadenza {
-  if (completataIl) return "completata";
-
+export function statoScadenza(dataScadenza: string): StatoScadenza {
   const oggi = new Date();
   oggi.setHours(0, 0, 0, 0);
   const scadenza = new Date(dataScadenza);

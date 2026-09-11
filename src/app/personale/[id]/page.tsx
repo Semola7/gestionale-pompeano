@@ -1,18 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppHeader } from "@/components/app-header";
-import { ScadenzaBadge } from "@/components/scadenza-badge";
 import { getCurrentProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { formattaData, statoScadenza } from "@/lib/date-utils";
 import { SCADENZE_PERSONALE_TIPI, TIPO_SCADENZA_LABELS } from "@/lib/labels";
 import type { Personale, ScadenzaPersonale } from "@/lib/types";
-import {
-  aggiungiScadenzaPersonale,
-  completaScadenzaPersonale,
-  eliminaPersonale,
-  eliminaScadenzaPersonale,
-} from "../actions";
+import { aggiungiScadenzaPersonale, eliminaPersonale } from "../actions";
+import { ScadenzaRow } from "./scadenza-row";
 
 export default async function PersonaleDetailPage(ctx: PageProps<"/personale/[id]">) {
   const { id } = await ctx.params;
@@ -43,6 +37,7 @@ export default async function PersonaleDetailPage(ctx: PageProps<"/personale/[id
         <div className="flex items-start justify-between rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
           <div>
             <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">{persona.nome_completo}</h1>
+            {persona.mansione && <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{persona.mansione}</p>}
             <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
               {[persona.telefono, persona.email].filter(Boolean).join(" · ") || "Nessun contatto registrato"}
             </p>
@@ -61,35 +56,19 @@ export default async function PersonaleDetailPage(ctx: PageProps<"/personale/[id
           <h2 className="mb-4 text-sm font-semibold uppercase text-zinc-500 dark:text-zinc-400">Scadenze</h2>
 
           <div className="mb-4 space-y-2">
-            {(scadenze ?? []).map((s) => (
-              <div
-                key={s.id}
-                className="flex items-center justify-between gap-4 rounded-md border border-zinc-100 px-3 py-2 dark:border-zinc-900"
-              >
-                <div className="flex items-center gap-3">
-                  <ScadenzaBadge stato={statoScadenza(s.data_scadenza, s.completata_il)} />
+            {(scadenze ?? []).map((s) =>
+              isAdmin ? (
+                <ScadenzaRow key={s.id} scadenza={s} personaleId={persona.id} />
+              ) : (
+                <div
+                  key={s.id}
+                  className="flex items-center gap-3 rounded-md border border-zinc-100 px-3 py-2 dark:border-zinc-900"
+                >
                   <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50">{TIPO_SCADENZA_LABELS[s.tipo]}</span>
-                  <span className="text-sm text-zinc-500 dark:text-zinc-400">{formattaData(s.data_scadenza)}</span>
-                  {s.descrizione && <span className="text-sm text-zinc-400 dark:text-zinc-600">{s.descrizione}</span>}
+                  <span className="text-sm text-zinc-500 dark:text-zinc-400">{s.data_scadenza}</span>
                 </div>
-                {isAdmin && (
-                  <div className="flex items-center gap-3 text-sm">
-                    {!s.completata_il && (
-                      <form action={completaScadenzaPersonale.bind(null, s.id, persona.id)}>
-                        <button type="submit" className="text-emerald-600 hover:underline dark:text-emerald-400">
-                          Completa
-                        </button>
-                      </form>
-                    )}
-                    <form action={eliminaScadenzaPersonale.bind(null, s.id, persona.id)}>
-                      <button type="submit" className="text-red-600 hover:underline dark:text-red-400">
-                        Elimina
-                      </button>
-                    </form>
-                  </div>
-                )}
-              </div>
-            ))}
+              )
+            )}
             {(scadenze ?? []).length === 0 && (
               <p className="text-sm text-zinc-400 dark:text-zinc-600">Nessuna scadenza registrata.</p>
             )}

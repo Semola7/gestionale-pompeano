@@ -20,7 +20,6 @@ export default async function AttrezzaturePage() {
   const { data: scadenze } = await supabase
     .from("scadenze_attrezzature")
     .select("*")
-    .is("completata_il", null)
     .returns<ScadenzaAttrezzatura[]>();
 
   const prossimaPerAttrezzatura = new Map<string, ScadenzaAttrezzatura>();
@@ -72,7 +71,7 @@ export default async function AttrezzaturePage() {
                     <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300">{a.matricola ?? "—"}</td>
                     <td className="px-4 py-3">
                       {prossima ? (
-                        <ScadenzaBadge stato={statoScadenza(prossima.data_scadenza, prossima.completata_il)} />
+                        <ScadenzaBadge stato={statoScadenza(prossima.data_scadenza)} />
                       ) : (
                         <span className="text-zinc-400 dark:text-zinc-600">—</span>
                       )}

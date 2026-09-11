@@ -1,4 +1,4 @@
-import type { TipoAttrezzatura, TipoMezzo, TipoScadenza } from "@/lib/types";
+import type { Mezzo, RegimePossesso, TipoAttrezzatura, TipoMezzo, TipoScadenza } from "@/lib/types";
 
 export const TIPO_MEZZO_LABELS: Record<TipoMezzo, string> = {
   autocarro: "Autocarro",
@@ -10,6 +10,24 @@ export const TIPO_MEZZO_LABELS: Record<TipoMezzo, string> = {
   camion_gruato: "Camion gruato",
   rimorchio: "Rimorchio",
 };
+
+export const REGIME_POSSESSO_LABELS: Record<RegimePossesso, string> = {
+  proprieta: "Proprietà",
+  noleggio: "Noleggio",
+  leasing: "Leasing",
+};
+
+// Le scadenze dei mezzi sono colonne dirette su `mezzi` (una sola data per
+// tipo, aggiornata quando viene rinnovata), non righe di uno storico.
+export const MEZZO_SCADENZA_FIELDS: { key: keyof Mezzo; label: string }[] = [
+  { key: "scadenza_assicurazione", label: "Assicurazione" },
+  { key: "scadenza_revisione_mctc", label: "Revisione MCTC" },
+  { key: "scadenza_bollo", label: "Bollo" },
+  { key: "scadenza_visita_inail", label: "Visita INAIL/ASL" },
+  { key: "scadenza_collaudo", label: "Collaudo" },
+  { key: "scadenza_manutenzione_programmata", label: "Manutenzione programmata" },
+  { key: "scadenza_contratto_noleggio", label: "Contratto noleggio/leasing" },
+];
 
 export const TIPO_ATTREZZATURA_LABELS: Record<TipoAttrezzatura, string> = {
   catena: "Catena",
@@ -34,15 +52,6 @@ export const TIPO_SCADENZA_LABELS: Record<TipoScadenza, string> = {
   dpi: "DPI",
   altro: "Altro",
 };
-
-export const SCADENZE_MEZZI_TIPI: TipoScadenza[] = [
-  "revisione",
-  "verifica_periodica_inail",
-  "collaudo",
-  "assicurazione",
-  "manutenzione_programmata",
-  "altro",
-];
 
 export const SCADENZE_ATTREZZATURE_TIPI: TipoScadenza[] = ["verifica_periodica", "altro"];
 

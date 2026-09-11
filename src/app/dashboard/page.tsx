@@ -3,42 +3,10 @@ import { AppHeader } from "@/components/app-header";
 import { ScadenzaBadge } from "@/components/scadenza-badge";
 import { getCurrentProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { formattaData, statoScadenza } from "@/lib/date-utils";
-import { TIPO_MEZZO_LABELS, TIPO_SCADENZA_LABELS } from "@/lib/labels";
-import type { StatoScadenza } from "@/lib/date-utils";
+import { formattaData } from "@/lib/date-utils";
+import { TIPO_MEZZO_LABELS } from "@/lib/labels";
+import { fetchScadenzeAggregate } from "@/lib/scadenze-aggregate";
 import type { Mezzo } from "@/lib/types";
-
-type RigaScadenza = {
-  id: string;
-  entita: "Mezzo" | "Attrezzatura" | "Personale";
-  entitaNome: string;
-  entitaHref: string;
-  tipo: string;
-  data_scadenza: string;
-  stato: StatoScadenza;
-};
-
-type ScadenzaMezzoRiga = {
-  id: string;
-  tipo: string;
-  data_scadenza: string;
-  completata_il: string | null;
-  mezzo: { id: string; nome: string } | null;
-};
-type ScadenzaAttrezzaturaRiga = {
-  id: string;
-  tipo: string;
-  data_scadenza: string;
-  completata_il: string | null;
-  attrezzatura: { id: string; nome: string } | null;
-};
-type ScadenzaPersonaleRiga = {
-  id: string;
-  tipo: string;
-  data_scadenza: string;
-  completata_il: string | null;
-  persona: { id: string; nome_completo: string } | null;
-};
 
 type PresenzaRiga = {
   personale_id: string;
@@ -54,40 +22,19 @@ export default async function DashboardPage() {
   const inizioGiorno = new Date();
   inizioGiorno.setHours(0, 0, 0, 0);
 
-  const [
-    { data: mezzi },
-    { count: totaleAttrezzature },
-    { count: totalePersonale },
-    { data: scadenzeMezzi },
-    { data: scadenzeAttrezzature },
-    { data: scadenzePersonale },
-    { data: presenzeOggi },
-  ] = await Promise.all([
-    supabase.from("mezzi").select("tipo").returns<Pick<Mezzo, "tipo">[]>(),
-    supabase.from("attrezzature").select("id", { count: "exact", head: true }),
-    supabase.from("personale").select("id", { count: "exact", head: true }),
-    supabase
-      .from("scadenze_mezzi")
-      .select("id, tipo, data_scadenza, completata_il, mezzo:mezzi(id, nome)")
-      .is("completata_il", null)
-      .returns<ScadenzaMezzoRiga[]>(),
-    supabase
-      .from("scadenze_attrezzature")
-      .select("id, tipo, data_scadenza, completata_il, attrezzatura:attrezzature(id, nome)")
-      .is("completata_il", null)
-      .returns<ScadenzaAttrezzaturaRiga[]>(),
-    supabase
-      .from("scadenze_personale")
-      .select("id, tipo, data_scadenza, completata_il, persona:personale(id, nome_completo)")
-      .is("completata_il", null)
-      .returns<ScadenzaPersonaleRiga[]>(),
-    supabase
-      .from("presenze")
-      .select("personale_id, tipo, timbrato_il, persona:personale(nome_completo)")
-      .gte("timbrato_il", inizioGiorno.toISOString())
-      .order("timbrato_il", { ascending: true })
-      .returns<PresenzaRiga[]>(),
-  ]);
+  const [{ data: mezzi }, { count: totaleAttrezzature }, { count: totalePersonale }, { data: presenzeOggi }, righeScadenze] =
+    await Promise.all([
+      supabase.from("mezzi").select("tipo").returns<Pick<Mezzo, "tipo">[]>(),
+      supabase.from("attrezzature").select("id", { count: "exact", head: true }),
+      supabase.from("personale").select("id", { count: "exact", head: true }),
+      supabase
+        .from("presenze")
+        .select("personale_id, tipo, timbrato_il, persona:personale(nome_completo)")
+        .gte("timbrato_il", inizioGiorno.toISOString())
+        .order("timbrato_il", { ascending: true })
+        .returns<PresenzaRiga[]>(),
+      fetchScadenzeAggregate(supabase),
+    ]);
 
   const ultimoEventoPerPersona = new Map<string, PresenzaRiga>();
   for (const p of presenzeOggi ?? []) {
@@ -102,37 +49,7 @@ export default async function DashboardPage() {
     conteggioPerTipo.set(m.tipo, (conteggioPerTipo.get(m.tipo) ?? 0) + 1);
   }
 
-  const righe: RigaScadenza[] = [
-    ...(scadenzeMezzi ?? []).map((s) => ({
-      id: s.id,
-      entita: "Mezzo" as const,
-      entitaNome: s.mezzo?.nome ?? "—",
-      entitaHref: `/mezzi/${s.mezzo?.id}`,
-      tipo: s.tipo,
-      data_scadenza: s.data_scadenza,
-      stato: statoScadenza(s.data_scadenza, s.completata_il),
-    })),
-    ...(scadenzeAttrezzature ?? []).map((s) => ({
-      id: s.id,
-      entita: "Attrezzatura" as const,
-      entitaNome: s.attrezzatura?.nome ?? "—",
-      entitaHref: `/attrezzature/${s.attrezzatura?.id}`,
-      tipo: s.tipo,
-      data_scadenza: s.data_scadenza,
-      stato: statoScadenza(s.data_scadenza, s.completata_il),
-    })),
-    ...(scadenzePersonale ?? []).map((s) => ({
-      id: s.id,
-      entita: "Personale" as const,
-      entitaNome: s.persona?.nome_completo ?? "—",
-      entitaHref: `/personale/${s.persona?.id}`,
-      tipo: s.tipo,
-      data_scadenza: s.data_scadenza,
-      stato: statoScadenza(s.data_scadenza, s.completata_il),
-    })),
-  ];
-
-  const scadenzeUrgenti = righe
+  const scadenzeUrgenti = righeScadenze
     .filter((r) => r.stato === "scaduta" || r.stato === "urgente")
     .sort((a, b) => a.data_scadenza.localeCompare(b.data_scadenza))
     .slice(0, 10);
@@ -211,9 +128,7 @@ export default async function DashboardPage() {
                 <div className="flex items-center gap-3">
                   <ScadenzaBadge stato={r.stato} />
                   <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50">{r.entitaNome}</span>
-                  <span className="text-sm text-zinc-500 dark:text-zinc-400">
-                    {TIPO_SCADENZA_LABELS[r.tipo as keyof typeof TIPO_SCADENZA_LABELS]}
-                  </span>
+                  <span className="text-sm text-zinc-500 dark:text-zinc-400">{r.tipoLabel}</span>
                 </div>
                 <span className="text-sm text-zinc-500 dark:text-zinc-400">{formattaData(r.data_scadenza)}</span>
               </Link>

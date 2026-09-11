@@ -17,6 +17,7 @@ export async function creaPersonale(formData: FormData) {
     .from("personale")
     .insert({
       nome_completo: nomeCompleto,
+      mansione: String(formData.get("mansione") ?? "").trim() || null,
       telefono: String(formData.get("telefono") ?? "").trim() || null,
       email: String(formData.get("email") ?? "").trim() || null,
       note: String(formData.get("note") ?? "").trim() || null,
@@ -58,14 +59,26 @@ export async function aggiungiScadenzaPersonale(formData: FormData) {
   revalidatePath(`/personale/${personaleId}`);
 }
 
-export async function completaScadenzaPersonale(id: string, personaleId: string) {
+export async function aggiornaScadenzaPersonale(id: string, personaleId: string, formData: FormData) {
   await requireRole("admin");
   const supabase = await createClient();
-  await supabase
+
+  const tipo = String(formData.get("tipo") ?? "") as TipoScadenza;
+  const dataScadenza = String(formData.get("data_scadenza") ?? "");
+  if (!tipo || !dataScadenza) throw new Error("Tipo e data scadenza sono obbligatori.");
+
+  const { error } = await supabase
     .from("scadenze_personale")
-    .update({ completata_il: new Date().toISOString().slice(0, 10) })
+    .update({
+      tipo,
+      data_scadenza: dataScadenza,
+      descrizione: String(formData.get("descrizione") ?? "").trim() || null,
+    })
     .eq("id", id);
+
+  if (error) throw new Error(`Errore nell'aggiornamento della scadenza: ${error.message}`);
   revalidatePath(`/personale/${personaleId}`);
+  revalidatePath("/scadenze");
 }
 
 export async function eliminaScadenzaPersonale(id: string, personaleId: string) {

@@ -2,109 +2,23 @@ import Link from "next/link";
 import { AppHeader } from "@/components/app-header";
 import { ScadenzaBadge } from "@/components/scadenza-badge";
 import { createClient } from "@/lib/supabase/server";
-import { formattaData, statoScadenza } from "@/lib/date-utils";
-import { TIPO_SCADENZA_LABELS } from "@/lib/labels";
-import type { StatoScadenza } from "@/lib/date-utils";
-
-type RigaScadenza = {
-  id: string;
-  entita: "Mezzo" | "Attrezzatura" | "Personale";
-  entitaNome: string;
-  entitaHref: string;
-  tipo: string;
-  data_scadenza: string;
-  completata_il: string | null;
-  stato: StatoScadenza;
-};
+import { formattaData } from "@/lib/date-utils";
+import { fetchScadenzeAggregate } from "@/lib/scadenze-aggregate";
 
 const FILTRI: { valore: string; label: string }[] = [
   { valore: "attive", label: "Scadute + in scadenza" },
   { valore: "tutte", label: "Tutte" },
-  { valore: "completate", label: "Completate" },
 ];
-
-type ScadenzaMezzoRiga = {
-  id: string;
-  tipo: string;
-  data_scadenza: string;
-  completata_il: string | null;
-  mezzo: { id: string; nome: string } | null;
-};
-type ScadenzaAttrezzaturaRiga = {
-  id: string;
-  tipo: string;
-  data_scadenza: string;
-  completata_il: string | null;
-  attrezzatura: { id: string; nome: string } | null;
-};
-type ScadenzaPersonaleRiga = {
-  id: string;
-  tipo: string;
-  data_scadenza: string;
-  completata_il: string | null;
-  persona: { id: string; nome_completo: string } | null;
-};
 
 export default async function ScadenzePage(ctx: PageProps<"/scadenze">) {
   const searchParams = await ctx.searchParams;
   const filtro = typeof searchParams.stato === "string" ? searchParams.stato : "attive";
 
   const supabase = await createClient();
-
-  const [{ data: mezzi }, { data: attrezzature }, { data: personale }] = await Promise.all([
-    supabase
-      .from("scadenze_mezzi")
-      .select("id, tipo, data_scadenza, completata_il, mezzo:mezzi(id, nome)")
-      .returns<ScadenzaMezzoRiga[]>(),
-    supabase
-      .from("scadenze_attrezzature")
-      .select("id, tipo, data_scadenza, completata_il, attrezzatura:attrezzature(id, nome)")
-      .returns<ScadenzaAttrezzaturaRiga[]>(),
-    supabase
-      .from("scadenze_personale")
-      .select("id, tipo, data_scadenza, completata_il, persona:personale(id, nome_completo)")
-      .returns<ScadenzaPersonaleRiga[]>(),
-  ]);
-
-  const righe: RigaScadenza[] = [
-    ...(mezzi ?? []).map((s) => ({
-      id: s.id,
-      entita: "Mezzo" as const,
-      entitaNome: s.mezzo?.nome ?? "—",
-      entitaHref: `/mezzi/${s.mezzo?.id}`,
-      tipo: s.tipo,
-      data_scadenza: s.data_scadenza,
-      completata_il: s.completata_il,
-      stato: statoScadenza(s.data_scadenza, s.completata_il),
-    })),
-    ...(attrezzature ?? []).map((s) => ({
-      id: s.id,
-      entita: "Attrezzatura" as const,
-      entitaNome: s.attrezzatura?.nome ?? "—",
-      entitaHref: `/attrezzature/${s.attrezzatura?.id}`,
-      tipo: s.tipo,
-      data_scadenza: s.data_scadenza,
-      completata_il: s.completata_il,
-      stato: statoScadenza(s.data_scadenza, s.completata_il),
-    })),
-    ...(personale ?? []).map((s) => ({
-      id: s.id,
-      entita: "Personale" as const,
-      entitaNome: s.persona?.nome_completo ?? "—",
-      entitaHref: `/personale/${s.persona?.id}`,
-      tipo: s.tipo,
-      data_scadenza: s.data_scadenza,
-      completata_il: s.completata_il,
-      stato: statoScadenza(s.data_scadenza, s.completata_il),
-    })),
-  ];
+  const righe = await fetchScadenzeAggregate(supabase);
 
   const righeFiltrate = righe
-    .filter((r) => {
-      if (filtro === "completate") return r.stato === "completata";
-      if (filtro === "tutte") return true;
-      return r.stato === "scaduta" || r.stato === "urgente";
-    })
+    .filter((r) => (filtro === "tutte" ? true : r.stato === "scaduta" || r.stato === "urgente"))
     .sort((a, b) => a.data_scadenza.localeCompare(b.data_scadenza));
 
   return (
@@ -148,7 +62,7 @@ export default async function ScadenzePage(ctx: PageProps<"/scadenze">) {
                   <td className="px-4 py-3">
                     <ScadenzaBadge stato={r.stato} />
                   </td>
-                  <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300">{TIPO_SCADENZA_LABELS[r.tipo as keyof typeof TIPO_SCADENZA_LABELS]}</td>
+                  <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300">{r.tipoLabel}</td>
                   <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300">{r.entita}</td>
                   <td className="px-4 py-3">
                     <Link href={r.entitaHref} className="font-medium text-zinc-900 hover:underline dark:text-zinc-50">
