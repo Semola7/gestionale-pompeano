@@ -7,20 +7,15 @@ export async function getCurrentProfile() {
 
   const {
     data: { user },
-    error: userError,
   } = await supabase.auth.getUser();
-
-  console.log("[getCurrentProfile] user:", user?.id ?? null, "error:", userError?.message ?? null);
 
   if (!user) redirect("/login");
 
-  const { data: profile, error: profileError } = await supabase
+  const { data: profile } = await supabase
     .from("profiles")
     .select("id, ruolo, nome_completo")
     .eq("id", user.id)
     .single<Profile>();
-
-  console.log("[getCurrentProfile] profile:", profile ?? null, "error:", profileError?.message ?? null);
 
   if (!profile) redirect("/login");
 
