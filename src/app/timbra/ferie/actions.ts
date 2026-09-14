@@ -34,3 +34,17 @@ export async function richiediFerie(formData: FormData) {
 
   revalidatePath("/timbra/ferie");
 }
+
+export async function annullaRichiestaFerie(id: string) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Sessione scaduta. Effettua di nuovo l'accesso.");
+
+  const { error } = await supabase.from("richieste_ferie").delete().eq("id", id);
+  if (error) throw new Error(`Errore nell'annullamento della richiesta: ${error.message}`);
+
+  revalidatePath("/timbra/ferie");
+}

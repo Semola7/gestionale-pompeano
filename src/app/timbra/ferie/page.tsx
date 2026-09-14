@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formattaData } from "@/lib/date-utils";
 import { StatoFerieBadge } from "@/components/stato-ferie-badge";
 import { DipendenteNav } from "../dipendente-nav";
-import { richiediFerie } from "./actions";
+import { annullaRichiestaFerie, richiediFerie } from "./actions";
 import type { RichiestaFerie } from "@/lib/types";
 
 export default async function FeriePage() {
@@ -96,6 +96,13 @@ export default async function FeriePage() {
                   <StatoFerieBadge stato={r.stato} />
                 </div>
                 {r.note && <p className="text-sm text-zinc-500 dark:text-zinc-400">{r.note}</p>}
+                {r.stato === "in_attesa" && (
+                  <form action={annullaRichiestaFerie.bind(null, r.id)} className="mt-2">
+                    <button type="submit" className="text-sm text-red-600 hover:underline dark:text-red-400">
+                      Annulla richiesta
+                    </button>
+                  </form>
+                )}
               </div>
             ))}
             {(richieste ?? []).length === 0 && (
