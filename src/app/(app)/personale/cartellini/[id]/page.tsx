@@ -1,47 +1,44 @@
-import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { raggruppaPerGiorno } from "@/lib/cartellino";
-import { DipendenteNav } from "../dipendente-nav";
-import type { Presenza } from "@/lib/types";
+import type { Personale, Presenza } from "@/lib/types";
 
-export default async function CartellinoPage() {
+export default async function CartellinoDipendentePage(ctx: PageProps<"/personale/cartellini/[id]">) {
+  const { id } = await ctx.params;
   const supabase = await createClient();
 
   const { data: persona } = await supabase
     .from("personale")
     .select("id, nome_completo")
-    .eq("auth_user_id", (await supabase.auth.getUser()).data.user?.id ?? "")
-    .single();
+    .eq("id", id)
+    .single<Pick<Personale, "id" | "nome_completo">>();
+  if (!persona) notFound();
 
-  const { data: presenze } = persona
-    ? await supabase
-        .from("presenze")
-        .select("*")
-        .eq("personale_id", persona.id)
-        .order("timbrato_il", { ascending: false })
-        .limit(200)
-        .returns<Presenza[]>()
-    : { data: null };
+  const { data: presenze } = await supabase
+    .from("presenze")
+    .select("*")
+    .eq("personale_id", id)
+    .order("timbrato_il", { ascending: false })
+    .limit(300)
+    .returns<Presenza[]>();
 
   const giorni = raggruppaPerGiorno(presenze ?? []);
 
   return (
-    <div className="flex flex-1 flex-col items-center bg-zinc-50 px-4 py-10 dark:bg-black">
-      <Image
-        src="/lg_pmp.png"
-        alt="Pompeano Antonio & Figli"
-        width={480}
-        height={200}
-        priority
-        className="mb-6 h-20 w-auto"
-      />
-      <h1 className="mb-1 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-        {persona?.nome_completo ?? "Il mio cartellino"}
-      </h1>
+    <div className="space-y-6">
+      <div>
+        <Link
+          href="/personale/cartellini"
+          className="text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+        >
+          ← Cartellini
+        </Link>
+      </div>
 
-      <DipendenteNav attivo="cartellino" />
+      <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">{persona.nome_completo}</h1>
 
-      <div className="w-full max-w-lg space-y-2">
+      <div className="space-y-2">
         {giorni.map((g) => (
           <div key={g.data} className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
             <div className="mb-2 flex items-center justify-between">
@@ -63,7 +60,7 @@ export default async function CartellinoPage() {
           </div>
         ))}
         {giorni.length === 0 && (
-          <p className="text-center text-sm text-zinc-400 dark:text-zinc-600">Nessuna timbratura registrata.</p>
+          <p className="text-sm text-zinc-400 dark:text-zinc-600">Nessuna timbratura registrata.</p>
         )}
       </div>
     </div>
