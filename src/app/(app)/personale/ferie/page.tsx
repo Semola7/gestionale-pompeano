@@ -13,7 +13,7 @@ const FILTRI: { valore: string; label: string }[] = [
   { valore: "tutte", label: "Tutte" },
 ];
 
-export default async function FeriePage(ctx: PageProps<"/ferie">) {
+export default async function FeriePage(ctx: PageProps<"/personale/ferie">) {
   const profile = await getCurrentProfile();
   const isAdmin = profile.ruolo === "admin";
 
@@ -30,14 +30,20 @@ export default async function FeriePage(ctx: PageProps<"/ferie">) {
   const { data: richieste } = await query.returns<RichiestaConNome[]>();
 
   return (
-    <div>
-      <div className="mb-6 flex items-center justify-between">
+    <div className="space-y-6">
+      <div>
+        <Link href="/personale" className="text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50">
+          ← Personale
+        </Link>
+      </div>
+
+      <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">Ferie</h1>
         <div className="flex gap-2">
           {FILTRI.map((f) => (
             <Link
               key={f.valore}
-              href={`/ferie?stato=${f.valore}`}
+              href={`/personale/ferie?stato=${f.valore}`}
               className={`rounded-md px-3 py-1.5 text-sm font-medium ${
                 filtro === f.valore
                   ? "bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900"

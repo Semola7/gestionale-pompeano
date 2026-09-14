@@ -15,7 +15,7 @@ async function decidiRichiesta(id: string, stato: StatoRichiestaFerie) {
     .eq("id", id);
 
   if (error) throw new Error(`Errore nell'aggiornamento della richiesta: ${error.message}`);
-  revalidatePath("/ferie");
+  revalidatePath("/personale/ferie");
 }
 
 export async function approvaFerie(id: string) {
