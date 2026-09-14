@@ -49,7 +49,12 @@ export default async function PersonaleDetailPage(ctx: PageProps<"/personale/[id
         ) : null}
 
         {isAdmin && (
-          <DipendenteAccount personaleId={persona.id} haAccount={!!persona.auth_user_id} emailAttuale={persona.email} />
+          <DipendenteAccount
+            personaleId={persona.id}
+            haAccount={!!persona.auth_user_id}
+            emailAttuale={persona.email}
+            haDispositivo={!!persona.dispositivo_id}
+          />
         )}
 
         {!isAdmin && (

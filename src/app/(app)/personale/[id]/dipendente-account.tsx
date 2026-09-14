@@ -2,16 +2,23 @@
 
 import { useState, useTransition } from "react";
 import { Field, inputClass } from "@/components/field";
-import { creaAccountDipendente, reimpostaPasswordDipendente, rimuoviAccountDipendente } from "../actions";
+import {
+  creaAccountDipendente,
+  reimpostaPasswordDipendente,
+  resetDispositivoDipendente,
+  rimuoviAccountDipendente,
+} from "../actions";
 
 export function DipendenteAccount({
   personaleId,
   haAccount,
   emailAttuale,
+  haDispositivo,
 }: {
   personaleId: string;
   haAccount: boolean;
   emailAttuale: string | null;
+  haDispositivo: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
   const [errore, setErrore] = useState<string | null>(null);
@@ -49,6 +56,22 @@ export function DipendenteAccount({
     });
   }
 
+  function handleResetDispositivo() {
+    if (!confirm("Sganciare il dispositivo registrato? Al prossimo utilizzo, il primo telefono che accede verrà registrato come nuovo dispositivo autorizzato.")) {
+      return;
+    }
+    setErrore(null);
+    setMessaggio(null);
+    startTransition(async () => {
+      try {
+        await resetDispositivoDipendente(personaleId);
+        setMessaggio("Dispositivo sganciato.");
+      } catch (err) {
+        setErrore(err instanceof Error ? err.message : "Errore imprevisto.");
+      }
+    });
+  }
+
   function handleRimuovi() {
     if (!confirm("Rimuovere l'accesso di questo dipendente? Non potrà più timbrare finché non gli crei un nuovo account.")) {
       return;
@@ -69,8 +92,20 @@ export function DipendenteAccount({
     return (
       <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
         <h2 className="mb-4 text-sm font-semibold uppercase text-zinc-500 dark:text-zinc-400">Accesso timbratura</h2>
-        <p className="mb-4 text-sm text-emerald-600 dark:text-emerald-400">
+        <p className="mb-1 text-sm text-emerald-600 dark:text-emerald-400">
           Account attivo{emailAttuale ? ` (${emailAttuale})` : ""}.
+        </p>
+        <p className="mb-4 text-sm text-zinc-500 dark:text-zinc-400">
+          {haDispositivo ? (
+            <>
+              Dispositivo registrato.{" "}
+              <button onClick={handleResetDispositivo} disabled={isPending} className="text-zinc-600 hover:underline dark:text-zinc-300">
+                Sgancia dispositivo
+              </button>
+            </>
+          ) : (
+            "Nessun dispositivo ancora registrato: verrà associato al primo telefono che timbra."
+          )}
         </p>
 
         {mostraReset ? (

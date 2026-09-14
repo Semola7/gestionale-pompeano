@@ -182,7 +182,14 @@ export async function rimuoviAccountDipendente(personaleId: string) {
 
   const admin = createAdminClient();
   await admin.auth.admin.deleteUser(persona.auth_user_id);
-  await supabase.from("personale").update({ auth_user_id: null }).eq("id", personaleId);
+  await supabase.from("personale").update({ auth_user_id: null, dispositivo_id: null }).eq("id", personaleId);
 
+  revalidatePath(`/personale/${personaleId}`);
+}
+
+export async function resetDispositivoDipendente(personaleId: string) {
+  await requireRole("admin");
+  const supabase = await createClient();
+  await supabase.from("personale").update({ dispositivo_id: null }).eq("id", personaleId);
   revalidatePath(`/personale/${personaleId}`);
 }

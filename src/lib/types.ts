@@ -88,6 +88,7 @@ export interface Personale {
   note: string | null;
   attivo: boolean;
   auth_user_id: string | null;
+  dispositivo_id: string | null;
   creato_il: string;
 }
 
