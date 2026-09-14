@@ -2,6 +2,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth";
 import { ConfirmTimbratura } from "./confirm-timbratura";
+import { DipendenteNav } from "./dipendente-nav";
 import type { Presenza } from "@/lib/types";
 
 export default async function TimbraturaPage() {
@@ -39,6 +40,8 @@ export default async function TimbraturaPage() {
       <h1 className="mb-1 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
         {persona?.nome_completo ?? profile.nome_completo}
       </h1>
+
+      {persona && <DipendenteNav attivo="timbra" />}
 
       {persona ? (
         <>

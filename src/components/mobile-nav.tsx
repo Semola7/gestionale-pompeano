@@ -10,6 +10,7 @@ const LINKS = [
   { href: "/mezzi", label: "Mezzi" },
   { href: "/attrezzature", label: "Attrezzature" },
   { href: "/scadenze", label: "Scadenze" },
+  { href: "/ferie", label: "Ferie" },
 ];
 
 export function MobileNav({

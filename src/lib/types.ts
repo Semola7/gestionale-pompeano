@@ -121,6 +121,20 @@ export interface Presenza {
   timbrato_il: string;
 }
 
+export type StatoRichiestaFerie = "in_attesa" | "approvata" | "rifiutata";
+
+export interface RichiestaFerie {
+  id: string;
+  personale_id: string;
+  data_inizio: string;
+  data_fine: string;
+  note: string | null;
+  stato: StatoRichiestaFerie;
+  gestita_da: string | null;
+  gestita_il: string | null;
+  creato_il: string;
+}
+
 export interface DocumentoMezzo {
   id: string;
   mezzo_id: string;

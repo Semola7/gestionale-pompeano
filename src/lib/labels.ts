@@ -1,4 +1,12 @@
-import type { Mezzo, RegimePossesso, TipoAttrezzatura, TipoContratto, TipoMezzo, TipoScadenza } from "@/lib/types";
+import type {
+  Mezzo,
+  RegimePossesso,
+  StatoRichiestaFerie,
+  TipoAttrezzatura,
+  TipoContratto,
+  TipoMezzo,
+  TipoScadenza,
+} from "@/lib/types";
 
 export const TIPO_MEZZO_LABELS: Record<TipoMezzo, string> = {
   autocarro: "Autocarro",
@@ -56,6 +64,12 @@ export const TIPO_SCADENZA_LABELS: Record<TipoScadenza, string> = {
   corso_sicurezza: "Corso sicurezza/formazione",
   dpi: "DPI",
   altro: "Altro",
+};
+
+export const STATO_FERIE_LABELS: Record<StatoRichiestaFerie, string> = {
+  in_attesa: "In attesa",
+  approvata: "Approvata",
+  rifiutata: "Rifiutata",
 };
 
 export const SCADENZE_ATTREZZATURE_TIPI: TipoScadenza[] = ["verifica_periodica", "altro"];
