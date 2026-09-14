@@ -22,8 +22,9 @@ export default async function AdminPage() {
         {/* eslint-disable-next-line @next/next/no-img-element -- data URL generato al volo, non un asset ottimizzabile */}
         <img src={qrDataUrl} alt="QR code timbratura" className="mx-auto mb-4 h-56 w-56" />
         <p className="mb-3 text-sm text-zinc-500 dark:text-zinc-400">
-          Stampa questo codice ed esponilo all&apos;ingresso. Ogni dipendente lo inquadra con il proprio telefono
-          per registrare entrata o uscita.
+          Stampa questo codice ed esponilo all&apos;ingresso. Ogni dipendente lo inquadra con il proprio telefono,
+          accede con il proprio account e registra entrata o uscita (richiede di essere nei pressi dello
+          stabilimento). Crea l&apos;account dei dipendenti dalla loro scheda in Personale.
         </p>
         <a
           href={timbraUrl}

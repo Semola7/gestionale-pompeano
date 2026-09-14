@@ -1,4 +1,4 @@
-export type RuoloUtente = "admin" | "operatore";
+export type RuoloUtente = "admin" | "operatore" | "dipendente";
 
 export interface Profile {
   id: string;
@@ -87,6 +87,7 @@ export interface Personale {
   email: string | null;
   note: string | null;
   attivo: boolean;
+  auth_user_id: string | null;
   creato_il: string;
 }
 

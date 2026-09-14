@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
+import { getCurrentProfile } from "@/lib/auth";
 
-export default function Home() {
-  redirect("/dashboard");
+export default async function Home() {
+  const profile = await getCurrentProfile();
+  redirect(profile.ruolo === "dipendente" ? "/timbra" : "/dashboard");
 }

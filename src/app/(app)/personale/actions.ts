@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth";
 import type { TipoContratto, TipoScadenza } from "@/lib/types";
 
@@ -106,5 +107,82 @@ export async function eliminaScadenzaPersonale(id: string, personaleId: string) 
   await requireRole("admin");
   const supabase = await createClient();
   await supabase.from("scadenze_personale").delete().eq("id", id);
+  revalidatePath(`/personale/${personaleId}`);
+}
+
+export async function creaAccountDipendente(personaleId: string, formData: FormData) {
+  await requireRole("admin");
+
+  const email = String(formData.get("email") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+  if (!email) throw new Error("L'email è obbligatoria.");
+  if (password.length < 6) throw new Error("La password deve avere almeno 6 caratteri.");
+
+  const supabase = await createClient();
+  const { data: persona } = await supabase
+    .from("personale")
+    .select("nome_completo")
+    .eq("id", personaleId)
+    .single();
+  if (!persona) throw new Error("Dipendente non trovato.");
+
+  const admin = createAdminClient();
+  const { data: nuovoUtente, error: createError } = await admin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { nome_completo: persona.nome_completo, ruolo: "dipendente" },
+  });
+  if (createError || !nuovoUtente.user) {
+    throw new Error(`Errore nella creazione dell'account: ${createError?.message ?? "sconosciuto"}`);
+  }
+
+  const { error: updateError } = await supabase
+    .from("personale")
+    .update({ auth_user_id: nuovoUtente.user.id, email })
+    .eq("id", personaleId);
+  if (updateError) {
+    throw new Error(`Account creato ma non collegato al dipendente: ${updateError.message}`);
+  }
+
+  revalidatePath(`/personale/${personaleId}`);
+}
+
+export async function reimpostaPasswordDipendente(personaleId: string, formData: FormData) {
+  await requireRole("admin");
+
+  const password = String(formData.get("password") ?? "");
+  if (password.length < 6) throw new Error("La password deve avere almeno 6 caratteri.");
+
+  const supabase = await createClient();
+  const { data: persona } = await supabase
+    .from("personale")
+    .select("auth_user_id")
+    .eq("id", personaleId)
+    .single();
+  if (!persona?.auth_user_id) throw new Error("Questo dipendente non ha un account.");
+
+  const admin = createAdminClient();
+  const { error } = await admin.auth.admin.updateUserById(persona.auth_user_id, { password });
+  if (error) throw new Error(`Errore nel reimpostare la password: ${error.message}`);
+
+  revalidatePath(`/personale/${personaleId}`);
+}
+
+export async function rimuoviAccountDipendente(personaleId: string) {
+  await requireRole("admin");
+
+  const supabase = await createClient();
+  const { data: persona } = await supabase
+    .from("personale")
+    .select("auth_user_id")
+    .eq("id", personaleId)
+    .single();
+  if (!persona?.auth_user_id) return;
+
+  const admin = createAdminClient();
+  await admin.auth.admin.deleteUser(persona.auth_user_id);
+  await supabase.from("personale").update({ auth_user_id: null }).eq("id", personaleId);
+
   revalidatePath(`/personale/${personaleId}`);
 }

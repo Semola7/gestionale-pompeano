@@ -6,6 +6,7 @@ import { formattaData } from "@/lib/date-utils";
 import { SCADENZE_PERSONALE_TIPI, TIPO_CONTRATTO_LABELS, TIPO_SCADENZA_LABELS } from "@/lib/labels";
 import type { Personale, ScadenzaPersonale } from "@/lib/types";
 import { aggiungiScadenzaPersonale, eliminaPersonale } from "../actions";
+import { DipendenteAccount } from "./dipendente-account";
 import { PersonaleEditForm } from "./personale-edit-form";
 import { ScadenzaRow } from "./scadenza-row";
 
@@ -45,7 +46,13 @@ export default async function PersonaleDetailPage(ctx: PageProps<"/personale/[id
             </div>
             <PersonaleEditForm persona={persona} />
           </div>
-        ) : (
+        ) : null}
+
+        {isAdmin && (
+          <DipendenteAccount personaleId={persona.id} haAccount={!!persona.auth_user_id} emailAttuale={persona.email} />
+        )}
+
+        {!isAdmin && (
           <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
             <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">{persona.nome_completo}</h1>
             {persona.mansione && <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{persona.mansione}</p>}

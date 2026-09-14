@@ -1,10 +1,13 @@
 import Image from "next/image";
+import { redirect } from "next/navigation";
 import { AppSidebar } from "@/components/app-sidebar";
 import { MobileNav } from "@/components/mobile-nav";
 import { getCurrentProfile } from "@/lib/auth";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const profile = await getCurrentProfile();
+  // I dipendenti hanno accesso solo alla timbratura, non al resto del gestionale.
+  if (profile.ruolo === "dipendente") redirect("/timbra");
   const isAdmin = profile.ruolo === "admin";
 
   return (
